@@ -10,10 +10,10 @@ library(ggplot2)
 
 raw <- read_csv("~/Library/CloudStorage/OneDrive-Personal/Documents/McGill Human Genetics/Thesis/Paper 1/SingaporeResidentsBySingleYearOfAgeEthnicGroupAndSexAtEndJuneAnnual.csv")
 
-# year columns
+# Year columns
 year_cols <- names(raw)[str_detect(names(raw), "^\\d{4}$")]
 
-# helper: identify age rows
+# Helper: identify age rows
 is_age_row <- function(x) {
   str_detect(x, "^\\d+ Year$|^\\d+ Years & Over$")
 }
