@@ -10,15 +10,15 @@
 #SBATCH --mem-per-cpu=6G
 
 # --------------------------------------------------------------
-# Script efficiency (39940574)
+# Script efficiency (44309595)
 # State: TIMEOUT (exit code 0)
 # Nodes: 1
 # Cores per node: 2
-# CPU Utilized: 1-20:33:24
-# CPU Efficiency: 46.41% of 4-00:00:28 core-walltime
-# Job Wall-clock time: 2-00:00:14
-# Memory Utilized: 1.16 GB
-# Memory Efficiency: 9.66% of 12.00 GB
+# CPU Utilized: 1-14:26:06
+# CPU Efficiency: 48.96% of 3-06:30:02 core-walltime
+# Job Wall-clock time: 1-15:15:01
+# Memory Utilized: 1.18 GB
+# Memory Efficiency: 9.83% of 12.00 GB
 
 # --------------------------------------------------------------
 # Load necessary modules
