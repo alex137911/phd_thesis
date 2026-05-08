@@ -8,6 +8,7 @@ library(sandwich)
 library(lmtest)
 library(ggplot2)
 
+# Load data
 raw <- read_csv("~/Library/CloudStorage/OneDrive-Personal/Documents/McGill Human Genetics/Thesis/Paper 1/SingaporeResidentsBySingleYearOfAgeEthnicGroupAndSexAtEndJuneAnnual.csv")
 
 # Year columns
@@ -93,7 +94,7 @@ singleAnalysis_df <- analysis_df %>%
     str_detect(age_group, "^\\d+ Year$")   # keep only single-year ages
   )
 
-# Breakdown Chinese by age decile ----------------------------------------------
+# Breakdown Chinese ethnicity by age decile -----------------------------------------
 ethnicity_breakdown <- singleAnalysis_df %>%
   filter(
     year %in% c(2005, 2025),
@@ -222,8 +223,6 @@ ggsave(
 )
 
 # -----------------------------
-
-
 # Calculate percentage Chinese responses
 pct_chinese_df <- analysis_df %>%
   dplyr::filter(
@@ -469,7 +468,7 @@ ggsave(
   bg       = "white"
 )
 
-# Annotation plot for 1977 cohort --------
+# Annotation plot for 1977 cohort -------------
 cohort1977_raw     <- subset(cohort_raw, cohort_raw$cohort == 1977)
 cohort1977_profile <- subset(cohort_profile, cohort_profile$cohort == 1977)
 
