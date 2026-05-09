@@ -4,7 +4,7 @@
 #SBATCH --job-name=01_process_CAGgeno
 #SBATCH --output=01_process_CAGgeno.out
 #SBATCH --error=01_process_CAGgeno.err
-#SBATCH --time=01:00:00
+#SBATCH --time=06:00:00
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=24G
@@ -14,7 +14,7 @@
 set -euo pipefail
 
 # --------------------------------------------------------------
-# Script efficiency (60672371)
+# Script efficiency (60693213)
 # State: COMPLETED (exit code 0)
 # Nodes: 1
 # Cores per node: 4
@@ -31,7 +31,7 @@ module purge
 module load StdEnv/2023
 module load gcc/12.3
 module load bcftools/1.19
-module load plink/2.00a5.8
+module load plink/2.0.0-a.6.32
 
 # Set threads for parallel processing
 THREADS="${SLURM_CPUS_PER_TASK:-4}"
@@ -68,7 +68,7 @@ CHROMOSOMES=($(seq -f "chr%g" 1 22))
 MAX_SAMPLE_MISSINGNESS=0.05   # 5% genotype missingness per sample (remove samples with call rate < 95%)
 MAX_VARIANT_MISSINGNESS=0.05  # 5% genotype missingness per variant (remove variants missing in > 5% of samples)
 MIN_MAF=0.01                  # Minor allele frequency > 1%
-# HWE_PVAL=1e-6               # Variants which depart Hardy-Weinberg equilibrium (p-value < 1e-6)
+HWE_PVAL=1e-6                 # Variants which depart Hardy-Weinberg equilibrium (p-value < 1e-6)
 
 # --------------------------------------------------------------
 # Step 1: Convert each CARTaGENE chromosome .VCF to PLINK2 PGEN
@@ -160,8 +160,8 @@ echo "Samples removed:"
 wc -l "$REMOVE_SAMPLES"
 
 # --------------------------------------------------------------
-# Step 4: Apply one genome-wide sample keep list to all chromosomes
-#         and filter variants by missingness and MAF
+# Step 4: Apply one genome-wide sample "keep" list to all chromosomes
+#         and filter variants by missingness, MAF, and HWE
 # --------------------------------------------------------------
 for CHR in "${CHROMOSOMES[@]}"; do
   IN_PREFIX="${RAW_PGEN_DIR}/${CHR}.CARTaGENE.biallelic_raw"
@@ -169,17 +169,27 @@ for CHR in "${CHROMOSOMES[@]}"; do
 
   echo "[$(date)] Step 4: Applying sample + variant QC for $CHR"
 
+  # HWE filter with PLINK2 k aparameter, mid-p adjustment and keep-fewhet
+    #
+    # Greer PJ, et al. (2024) A reassessment of Hardy-Weinberg equilibrium filtering 
+    # in large sample Genomic studies reports that k=0.001 produces consistent and 
+    # appropriate behavior across a wide range of large sample size
+    #
+    # mid-p modifier reduces the filter's tendency to favor retention of variants with missing data
+    # 
+    # keep-fewhet' mode only filters out variants with excess heterozygosity
+    # https://www.cog-genomics.org/plink/2.0/filter
   plink2 \
     --pfile "$IN_PREFIX" \
     --keep "$KEEP_SAMPLES" \
     --geno "$MAX_VARIANT_MISSINGNESS" \
     --maf "$MIN_MAF" \
+    --hwe "$HWE_PVAL" 0.001 midp keep-fewhet \
     --make-pgen \
     --threads "$THREADS" \
     --out "$OUT_PREFIX" \
     > "${LOG_DIR}/${CHR}.step4.CARTaGENE_QC.log" 2>&1
 done
-
 # --------------------------------------------------------------
 # Step 5: Export QCed CARTaGENE VCFs for HGDP-1000G intersection
 # --------------------------------------------------------------
