@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --account=def-vmooser
+#SBATCH --account=rrg-vmooser
 #SBATCH --job-name=process_HGDPgeno
 #SBATCH --output=process_HGDPgeno.out
 #SBATCH --error=process_HGDPgeno.err
