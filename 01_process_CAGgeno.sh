@@ -14,7 +14,7 @@
 set -euo pipefail
 
 # --------------------------------------------------------------
-# Script efficiency (60671816)
+# Script efficiency (60671968)
 # State: COMPLETED (exit code 0)
 # Nodes: 1
 # Cores per node: 2
@@ -118,7 +118,7 @@ done
 
 # --------------------------------------------------------------
 # Step 3: Aggregate sample missingness genome-wide
-#         - creates one sample list used for all chromosomes
+#         - creates one IID-only sample list used for all chromosomes
 # --------------------------------------------------------------
 GENOMEWIDE_SMISS="${SMISS_DIR}/CARTaGENE.genomewide.smiss"
 KEEP_SAMPLES="${SMISS_DIR}/CARTaGENE.keep_samples.mind${MAX_SAMPLE_MISSINGNESS}.txt"
@@ -130,30 +130,27 @@ awk '
 BEGIN { OFS="\t" }
 FNR == 1 { next }
 {
-  key = $1 "\t" $2
-  miss[key] += $3
-  obs[key]  += $4
+  iid = $1
+  miss[iid] += $2
+  obs[iid]  += $3
 }
 END {
-  print "#FID", "IID", "MISSING_CT", "OBS_CT", "F_MISS"
-  for (key in miss) {
-    split(key, a, "\t")
-    fmiss = (obs[key] > 0 ? miss[key] / obs[key] : "NA")
-    print a[1], a[2], miss[key], obs[key], fmiss
+  print "#IID", "MISSING_CT", "OBS_CT", "F_MISS"
+  for (iid in miss) {
+    fmiss = (obs[iid] > 0 ? miss[iid] / obs[iid] : "NA")
+    print iid, miss[iid], obs[iid], fmiss
   }
 }
 ' "${SMISS_DIR}"/chr*.CARTaGENE.smiss \
-  | sort -k2,2 \
+  | sort -k1,1 \
   > "$GENOMEWIDE_SMISS"
 
 awk -v max_miss="$MAX_SAMPLE_MISSINGNESS" '
-BEGIN { OFS="\t" }
-NR > 1 && $5 <= max_miss { print $1, $2 }
+NR > 1 && $4 <= max_miss { print $1 }
 ' "$GENOMEWIDE_SMISS" > "$KEEP_SAMPLES"
 
 awk -v max_miss="$MAX_SAMPLE_MISSINGNESS" '
-BEGIN { OFS="\t" }
-NR > 1 && $5 > max_miss { print $1, $2 }
+NR > 1 && $4 > max_miss { print $1 }
 ' "$GENOMEWIDE_SMISS" > "$REMOVE_SAMPLES"
 
 echo "Samples kept:"
@@ -176,7 +173,7 @@ for CHR in "${CHROMOSOMES[@]}"; do
     --pfile "$IN_PREFIX" \
     --keep "$KEEP_SAMPLES" \
     --geno "$MAX_VARIANT_MISSINGNESS" \
-    --maf "$MIN_CAG_MAF" \
+    --maf "$MIN_MAF" \
     --make-pgen \
     --threads "$THREADS" \
     --out "$OUT_PREFIX" \
@@ -184,7 +181,7 @@ for CHR in "${CHROMOSOMES[@]}"; do
 done
 
 # --------------------------------------------------------------
-# Step 5: Export QCed CARTaGENE VCFs for HGDP/1000G intersection.
+# Step 5: Export QCed CARTaGENE VCFs for HGDP-1000G intersection
 # --------------------------------------------------------------
 for CHR in "${CHROMOSOMES[@]}"; do
   IN_PREFIX="${QC_PGEN_DIR}/${CHR}.CARTaGENE.QC"
@@ -205,5 +202,5 @@ done
 echo "[$(date)] CARTaGENE QC complete."
 echo "QC PGEN files:"
 echo "  $QC_PGEN_DIR"
-echo "QC VCFs for HGDP/1000G intersection:"
+echo "QC VCFs for HGDP-1000G intersection:"
 echo "  $QC_VCF_DIR"
