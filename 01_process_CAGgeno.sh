@@ -4,7 +4,7 @@
 #SBATCH --job-name=01_process_CAGgeno
 #SBATCH --output=01_process_CAGgeno.out
 #SBATCH --error=01_process_CAGgeno.err
-#SBATCH --time=24:00:00
+#SBATCH --time=01:00:00
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=24G
@@ -14,15 +14,15 @@
 set -euo pipefail
 
 # --------------------------------------------------------------
-# Script efficiency (60671968)
+# Script efficiency (60672371)
 # State: COMPLETED (exit code 0)
 # Nodes: 1
-# Cores per node: 2
-# CPU Utilized: 04:20:42
-# CPU Efficiency: 52.74% of 08:14:18 core-walltime
-# Job Wall-clock time: 04:07:09
-# Memory Utilized: 28.44 MB
-# Memory Efficiency: 0.35% of 8.00 GB
+# Cores per node: 4
+# CPU Utilized: 00:14:39
+# CPU Efficiency: 55.08% of 00:26:36 core-walltime
+# Job Wall-clock time: 00:06:39
+# Memory Utilized: 8.35 GB
+# Memory Efficiency: 34.81% of 24.00 GB (24.00 GB/node)
 
 # --------------------------------------------------------------
 # Load necessary modules
