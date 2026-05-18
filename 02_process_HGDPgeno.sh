@@ -7,20 +7,20 @@
 #SBATCH --time=96:00:00
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=2
-#SBATCH --mem=12G
+#SBATCH --mem=20G
 
 set -euo pipefail
 
 # --------------------------------------------------------------
 # Script efficiency (60912782)
-# State: TIMEOUT (exit code 0)
+# State: COMPLETED (exit code 0)
 # Nodes: 1
 # Cores per node: 2
-# CPU Utilized: 1-14:26:06
-# CPU Efficiency: 48.96% of 3-06:30:02 core-walltime
-# Job Wall-clock time: 1-15:15:01
-# Memory Utilized: 1.18 GB
-# Memory Efficiency: 9.83% of 12.00 GB
+# CPU Utilized: 1-01:39:29
+# CPU Efficiency: 34.17% of 3-03:05:24 core-walltime
+# Job Wall-clock time: 1-13:32:42
+# Memory Utilized: 12.00 GB
+# Memory Efficiency: 99.98% of 12.00 GB (12.00 GB/node)
 
 # --------------------------------------------------------------
 # Load necessary modules
