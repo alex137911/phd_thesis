@@ -15,12 +15,12 @@ set -euo pipefail
 # Script efficiency (61143707)
 # State: COMPLETED (exit code 0)
 # Nodes: 1
-# Cores per node: 2
-# CPU Utilized: 1-01:39:29
-# CPU Efficiency: 34.17% of 3-03:05:24 core-walltime
-# Job Wall-clock time: 1-13:32:42
-# Memory Utilized: 12.00 GB
-# Memory Efficiency: 99.98% of 12.00 GB (12.00 GB/node)
+# Cores per node: 4
+# CPU Utilized: 01:20:55
+# CPU Efficiency: 24.21% of 05:34:12 core-walltime
+# Job Wall-clock time: 01:23:33
+# Memory Utilized: 14.44 GB
+# Memory Efficiency: 45.13% of 32.00 GB (32.00 GB/node)
 
 # --------------------------------------------------------------
 # Load necessary modules
