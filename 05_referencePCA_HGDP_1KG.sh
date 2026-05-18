@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #SBATCH --account=rrg-vmooser
-#SBATCH --job-name=04_referencePCA_HGDP_1KG
-#SBATCH --output=04_referencePCA_HGDP_1KG.out
-#SBATCH --error=04_referencePCA_HGDP_1KG.err
+#SBATCH --job-name=05_referencePCA_HGDP_1KG
+#SBATCH --output=05_referencePCA_HGDP_1KG.out
+#SBATCH --error=05_referencePCA_HGDP_1KG.err
 #SBATCH --time=24:00:00
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=4
@@ -55,15 +55,29 @@ if [[ ! -f "${REF_MERGED_PREFIX}.psam" ]]; then
 fi
 
 # --------------------------------------------------------------
-# Output directories
+# Output directories & parameters
 # --------------------------------------------------------------
 BASE_OUT="/lustre07/scratch/chanalex/CARTaGENE_HGDP-1KG/PCA_projection"
-PCA_DIR="${BASE_OUT}/10_reference_PCA"
+
+REF_MERGED_PREFIX="${BASE_OUT}/09_merged_autosomes/HGDP_1KG.QC.shared_LDpruned.autosomes"
+CAG_MERGED_PREFIX="${BASE_OUT}/09_merged_autosomes/CARTaGENE.QC.shared_LDpruned.autosomes"
+
+# Output directories for each step of the pipeline
+QC_DIR="${BASE_OUT}/10_prePCA_sample_QC"
+PCA_DIR="${BASE_OUT}/11_reference_PCA"
+KING_DIR="${BASE_OUT}/12_KING_relatedness_pruning"
 LOG_DIR="${BASE_OUT}/logs"
 
-mkdir -p "$PCA_DIR" "$KING_DIR" "$LOG_DIR"
+mkdir -p "$QC_DIR" "$PCA_DIR" "$KING_DIR" "$LOG_DIR"
 
+# PCA parameters
 N_PCS=20
+
+# Following: https://www.kingrelatedness.com/manual.shtml
+# Remove one sample from each related pair above this KING kinship threshold.
+# 0.177 ≈ remove duplicate/MZ + first-degree relatives.
+# 0.0884 ≈ more conservative; removes up to around second-degree relatives.
+KING_CUTOFF=0.0884
 
 # Directory to store KING output (relatedness estimates)
 KING_PREFIX="${KING_DIR}/HGDP_1KG.reference.king_cutoff_${KING_CUTOFF}"
@@ -71,15 +85,6 @@ KING_PREFIX="${KING_DIR}/HGDP_1KG.reference.king_cutoff_${KING_CUTOFF}"
 # Directory to store PCA output (reference PCA and self-projection)
 REF_PCA_PREFIX="${PCA_DIR}/HGDP_1KG.reference_PCA"
 REF_SELF_PROJECT_PREFIX="${PCA_DIR}/HGDP_1KG.reference_self_projected"
-
-# --------------------------------------------------------------
-# Parameters
-# --------------------------------------------------------------
-# Following: https://www.kingrelatedness.com/manual.shtml
-# Remove one sample from each related pair above this KING kinship threshold.
-# 0.177 ≈ remove duplicate/MZ + first-degree relatives.
-# 0.0884 ≈ more conservative; removes up to around second-degree relatives.
-KING_CUTOFF=0.0884
 
 # Output before and after KING pruning (unrelated samples)
 echo "Reference samples before KING pruning:"
@@ -89,7 +94,7 @@ echo "Reference variants:"
 grep -vc '^#' "${REF_MERGED_PREFIX}.pvar"
 
 # --------------------------------------------------------------
-# Step 1: KING relatedness pruning in HGDP/1000G reference
+# Step 1: KING relatedness pruning in HGDP-1000G reference
 #
 # This writes:
 #   ${KING_PREFIX}.king.cutoff.in.id   = unrelated/reference-training samples
@@ -145,7 +150,8 @@ plink2 \
 #
 # Use this .sscore file for plotting alongside CARTaGENE projection.
 # --------------------------------------------------------------
-# PC columns in .sscore start at column 6 (after IID, FID, and covariates)
+# PC weight columns in .eigenvec.allele start at column 6:
+# #CHROM, ID, REF, ALT, ALLELE, PC1, PC2, ...
 PC_START_COL=6
 PC_END_COL=$((5 + N_PCS))
 
