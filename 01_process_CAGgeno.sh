@@ -4,7 +4,7 @@
 #SBATCH --job-name=01_process_CAGgeno
 #SBATCH --output=01_process_CAGgeno.out
 #SBATCH --error=01_process_CAGgeno.err
-#SBATCH --time=06:00:00
+#SBATCH --time=01:00:00
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=24G
@@ -18,11 +18,11 @@ set -euo pipefail
 # State: COMPLETED (exit code 0)
 # Nodes: 1
 # Cores per node: 4
-# CPU Utilized: 00:14:39
-# CPU Efficiency: 55.08% of 00:26:36 core-walltime
-# Job Wall-clock time: 00:06:39
-# Memory Utilized: 8.35 GB
-# Memory Efficiency: 34.81% of 24.00 GB (24.00 GB/node)
+# CPU Utilized: 00:14:46
+# CPU Efficiency: 50.23% of 00:29:24 core-walltime
+# Job Wall-clock time: 00:07:21
+# Memory Utilized: 8.37 GB
+# Memory Efficiency: 34.86% of 24.00 GB (24.00 GB/node)
 
 # --------------------------------------------------------------
 # Load necessary modules
@@ -170,15 +170,15 @@ for CHR in "${CHROMOSOMES[@]}"; do
   echo "[$(date)] Step 4: Applying sample + variant QC for $CHR"
 
   # HWE filter with PLINK2 k aparameter, mid-p adjustment and keep-fewhet
-    #
-    # Greer PJ, et al. (2024) A reassessment of Hardy-Weinberg equilibrium filtering 
-    # in large sample Genomic studies reports that k=0.001 produces consistent and 
-    # appropriate behavior across a wide range of large sample size
-    #
-    # mid-p modifier reduces the filter's tendency to favor retention of variants with missing data
-    # 
-    # keep-fewhet' mode only filters out variants with excess heterozygosity
-    # https://www.cog-genomics.org/plink/2.0/filter
+  #
+  # Greer PJ, et al. (2024) A reassessment of Hardy-Weinberg equilibrium filtering 
+  # in large sample Genomic studies reports that k=0.001 produces consistent and 
+  # appropriate behavior across a wide range of large sample size
+  #
+  # mid-p modifier reduces the filter's tendency to favor retention of variants with missing data
+  # 
+  # keep-fewhet' mode only filters out variants with excess heterozygosity
+  # https://www.cog-genomics.org/plink/2.0/filter
   plink2 \
     --pfile "$IN_PREFIX" \
     --keep "$KEEP_SAMPLES" \
