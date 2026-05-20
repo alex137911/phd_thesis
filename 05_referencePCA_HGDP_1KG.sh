@@ -4,23 +4,23 @@
 #SBATCH --job-name=05_referencePCA_HGDP_1KG
 #SBATCH --output=05_referencePCA_HGDP_1KG.out
 #SBATCH --error=05_referencePCA_HGDP_1KG.err
-#SBATCH --time=24:00:00
+#SBATCH --time=4:00:00
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=50G
+#SBATCH --mem=12G
 
 set -euo pipefail
 
 # --------------------------------------------------------------
-# Script efficiency (61169769)
+# Script efficiency (61253983)
 # State: COMPLETED (exit code 0)
 # Nodes: 1
 # Cores per node: 4
-# CPU Utilized: 01:20:55
-# CPU Efficiency: 24.21% of 05:34:12 core-walltime
-# Job Wall-clock time: 01:23:33
-# Memory Utilized: 14.44 GB
-# Memory Efficiency: 45.13% of 32.00 GB (32.00 GB/node)
+# CPU Utilized: 00:03:31
+# CPU Efficiency: 56.12% of 00:06:16 core-walltime
+# Job Wall-clock time: 00:01:34
+# Memory Utilized: 501.04 MB
+# Memory Efficiency: 1.53% of 32.00 GB (32.00 GB/node)
 
 # --------------------------------------------------------------
 # Load necessary modules
@@ -36,7 +36,11 @@ THREADS="${SLURM_CPUS_PER_TASK:-4}"
 # --------------------------------------------------------------
 # Input directories/files
 # --------------------------------------------------------------
-REF_MERGED_PREFIX="/lustre07/scratch/chanalex/CARTaGENE_HGDP-1KG/PCA_projection/09_merged_autosomes/HGDP_1KG.QC.shared_LDpruned.autosomes"
+BASE_OUT="/lustre07/scratch/chanalex/CARTaGENE_HGDP-1KG/PCA_projection"
+
+# Merged and QCed datasets from previous steps
+REF_MERGED_PREFIX="${BASE_OUT}/10_prePCA_sample_QC/HGDP_1KG.QC.shared_LDpruned.autosomes_finalSample_QC"
+# CAG_MERGED_PREFIX="${BASE_OUT}/10_prePCA_sample_QC/CARTaGENE.QC.shared_LDpruned.autosomes_finalSample_QC"
 
 # Check for input files
 if [[ ! -f "${REF_MERGED_PREFIX}.pgen" ]]; then
@@ -57,18 +61,12 @@ fi
 # --------------------------------------------------------------
 # Output directories & parameters
 # --------------------------------------------------------------
-BASE_OUT="/lustre07/scratch/chanalex/CARTaGENE_HGDP-1KG/PCA_projection"
-
-REF_MERGED_PREFIX="${BASE_OUT}/09_merged_autosomes/HGDP_1KG.QC.shared_LDpruned.autosomes"
-CAG_MERGED_PREFIX="${BASE_OUT}/09_merged_autosomes/CARTaGENE.QC.shared_LDpruned.autosomes"
-
 # Output directories for each step of the pipeline
-QC_DIR="${BASE_OUT}/10_prePCA_sample_QC"
-PCA_DIR="${BASE_OUT}/11_reference_PCA"
-KING_DIR="${BASE_OUT}/12_KING_relatedness_pruning"
+KING_DIR="${BASE_OUT}/11_KING_relatedness_pruning"
+PCA_DIR="${BASE_OUT}/12_reference_PCA"
 LOG_DIR="${BASE_OUT}/logs"
 
-mkdir -p "$QC_DIR" "$PCA_DIR" "$KING_DIR" "$LOG_DIR"
+mkdir -p "$PCA_DIR" "$KING_DIR" "$LOG_DIR"
 
 # PCA parameters
 N_PCS=20
@@ -166,7 +164,7 @@ plink2 \
   --out "$REF_SELF_PROJECT_PREFIX" \
   > "${LOG_DIR}/step3.HGDP_1KG.all_reference_self_projection.log" 2>&1
 
-echo "[$(date)] HGDP/1000G reference PCA complete."
+echo "[$(date)] HGDP-1000G reference PCA complete."
 echo "KING retained sample list:"
 echo "  ${KING_PREFIX}.king.cutoff.in.id"
 echo "KING excluded sample list:"
