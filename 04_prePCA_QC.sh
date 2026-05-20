@@ -12,15 +12,15 @@
 set -euo pipefail
 
 # --------------------------------------------------------------
-# Script efficiency (61171399)
+# Script efficiency (61230408)
 # State: COMPLETED (exit code 0)
 # Nodes: 1
 # Cores per node: 4
-# CPU Utilized: 01:20:55
-# CPU Efficiency: 24.21% of 05:34:12 core-walltime
-# Job Wall-clock time: 01:23:33
-# Memory Utilized: 14.44 GB
-# Memory Efficiency: 45.13% of 32.00 GB (32.00 GB/node)
+# CPU Utilized: 00:00:40
+# CPU Efficiency: 29.41% of 00:02:16 core-walltime
+# Job Wall-clock time: 00:00:34
+# Memory Utilized: 5.48 GB
+# Memory Efficiency: 34.26% of 16.00 GB (16.00 GB/node)
 
 # --------------------------------------------------------------
 # Load necessary modules
@@ -64,8 +64,8 @@ plink2 \
   --pfile "$REF_MERGED_PREFIX" \
   --het \
   --threads "$THREADS" \
-  --out "${QC_DIR}/HGDP_1KG.reference.het" \
-  > "${LOG_DIR}/04.step1.HGDP_1KG.het.log" 2>&1
+  --out "${QC_DIR}/HGDP_1KG.reference" \
+  > "${LOG_DIR}/04.step1.HGDP_1KG_het.log" 2>&1
 
 echo "[$(date)] Step 1: CARTaGENE heterozygosity diagnostics"
 
@@ -73,24 +73,26 @@ plink2 \
   --pfile "$CAG_MERGED_PREFIX" \
   --het \
   --threads "$THREADS" \
-  --out "${QC_DIR}/CARTaGENE.projected_target.het" \
-  > "${LOG_DIR}/04.step1.CARTaGENE.het.log" 2>&1
+  --out "${QC_DIR}/CARTaGENE.projected_target" \
+  > "${LOG_DIR}/04.step1.CARTaGENE_het.log" 2>&1
 
 # --------------------------------------------------------------
 # Step 2: Missingness diagnostics on the final SNP set
 #
-# This is only a check. Sample missingness filters already 
-# applied upstream.
+# Re-checking sample missingness after merging and LD pruning, 
+# with the final SNP set used for PCA. Create an updated final
+# QC list of samples with missingness <= 0.05 for inclusion in PCA.
 # --------------------------------------------------------------
-
 echo "[$(date)] Step 2: HGDP-1000G missingness diagnostics"
 
+# Using --missing sample-only to get per-sample missingness rates.
 plink2 \
   --pfile "$REF_MERGED_PREFIX" \
   --missing sample-only \
   --threads "$THREADS" \
   --out "${QC_DIR}/HGDP_1KG.reference.final_missingness" \
   > "${LOG_DIR}/04.step2.HGDP_1KG.final_missingness.log" 2>&1
+
 
 echo "[$(date)] Step 2: CARTaGENE missingness diagnostics"
 
@@ -100,6 +102,39 @@ plink2 \
   --threads "$THREADS" \
   --out "${QC_DIR}/CARTaGENE.projected_target.final_missingness" \
   > "${LOG_DIR}/04.step2.CARTaGENE.final_missingness.log" 2>&1
+
+# Extracting lists of samples with missingness <= 0.05 (5%) for inclusion in PCA
+awk 'NR > 1 && $4 <= 0.05 {print $1}' \
+  "$QC_DIR/HGDP_1KG.reference.final_missingness.smiss" \
+  > "$QC_DIR/HGDP_1KG.reference.final_missingness.keep.txt"
+
+awk 'NR > 1 && $4 <= 0.05 {print $1}' \
+  "$QC_DIR/CARTaGENE.projected_target.final_missingness.smiss" \
+  > "$QC_DIR/CARTaGENE.projected_target.final_missingness.keep.txt"
+
+# Log samples with missingness > 0.05 for diagnostics
+awk 'NR > 1 && $4 > 0.05 {print $1, $4}' \
+  "$QC_DIR/HGDP_1KG.reference.final_missingness.smiss" \
+  > "$QC_DIR/HGDP_1KG.reference.final_missingness.remove_gt0.05.txt"
+
+awk 'NR > 1 && $4 > 0.05 {print $1, $4}' \
+  "$QC_DIR/CARTaGENE.projected_target.final_missingness.smiss" \
+  > "$QC_DIR/CARTaGENE.projected_target.final_missingness.remove_gt0.05.txt"
+
+# Create final sample QC .pgen files for PCA
+echo "[$(date)] Step 2: Creating final sample QC .pgen files for PCA"
+
+plink2 \
+  --pfile "$REF_MERGED_PREFIX" \
+  --keep "$QC_DIR/HGDP_1KG.reference.final_missingness.keep.txt" \
+  --make-pgen \
+  --out "$QC_DIR/HGDP_1KG.QC.shared_LDpruned.autosomes_finalSample_QC"
+
+plink2 \
+  --pfile "$CAG_MERGED_PREFIX" \
+  --keep "$QC_DIR/CARTaGENE.projected_target.final_missingness.keep.txt" \
+  --make-pgen \
+  --out "$QC_DIR/CARTaGENE.QC.shared_LDpruned.autosomes_finalSample_QC"
 
 # --------------------------------------------------------------
 # Step 3: Optional global heterozygosity outlier lists
@@ -111,7 +146,7 @@ plink2 \
 
 for PREFIX in HGDP_1KG.reference CARTaGENE.projected_target; do
 
-  HET_FILE="${QC_DIR}/${PREFIX}.het.het"
+  HET_FILE="${QC_DIR}/${PREFIX}.het"
   OUTLIER_FILE="${QC_DIR}/${PREFIX}.het_outliers.global_3SD.txt"
   SUMMARY_FILE="${QC_DIR}/${PREFIX}.het_summary.txt"
 
