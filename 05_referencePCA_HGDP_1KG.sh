@@ -4,23 +4,23 @@
 #SBATCH --job-name=05_referencePCA_HGDP_1KG
 #SBATCH --output=05_referencePCA_HGDP_1KG.out
 #SBATCH --error=05_referencePCA_HGDP_1KG.err
-#SBATCH --time=4:00:00
+#SBATCH --time=2:00:00
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=12G
+#SBATCH --mem=5G
 
 set -euo pipefail
 
 # --------------------------------------------------------------
-# Script efficiency (61253983)
+# Script efficiency (61254710)
 # State: COMPLETED (exit code 0)
 # Nodes: 1
 # Cores per node: 4
-# CPU Utilized: 00:03:31
-# CPU Efficiency: 56.12% of 00:06:16 core-walltime
-# Job Wall-clock time: 00:01:34
-# Memory Utilized: 501.04 MB
-# Memory Efficiency: 1.53% of 32.00 GB (32.00 GB/node)
+# CPU Utilized: 00:03:34
+# CPU Efficiency: 62.94% of 00:05:40 core-walltime
+# Job Wall-clock time: 00:01:25
+# Memory Utilized: 511.79 MB
+# Memory Efficiency: 10.00% of 5.00 GB (5.00 GB/node)
 
 # --------------------------------------------------------------
 # Load necessary modules
